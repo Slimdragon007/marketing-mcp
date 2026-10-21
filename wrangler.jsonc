@@ -1,0 +1,40 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "marketing-mcp",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-01",
+  // global_fetch_strictly_public: required by workers-oauth-provider for Client ID Metadata Documents (SSRF guard).
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "workers_dev": true,
+
+  // Create these with `wrangler kv namespace create OAUTH_KV` and `wrangler d1 create marketing-mcp-audit`, then paste the ids.
+  "kv_namespaces": [{ "binding": "OAUTH_KV", "id": "<your-kv-namespace-id>" }],
+  "d1_databases": [
+    {
+      "binding": "AUDIT_DB",
+      "database_name": "marketing-mcp-audit",
+      "database_id": "<your-audit-d1-id>",
+      "migrations_dir": "migrations"
+    },
+    // Owned by a separate Worker whose daily cron syncs Instagram/Facebook history. This Worker only SELECTs; never run migrations here.
+    {
+      "binding": "SIGNALS_DB",
+      "database_name": "marketing-signals",
+      "database_id": "<your-signals-d1-id>"
+    }
+  ],
+
+  // Public, non-sensitive. ADS_MAX_DAILY_BUDGET is reserved for a later phase; 0 blocks every spend increase.
+  "vars": {
+    "PUBLIC_ORIGIN": "https://marketing-mcp.<your-subdomain>.workers.dev",
+    "ALLOWED_EMAILS": "you@example.com",
+    "ADS_MAX_DAILY_BUDGET": "0"
+  },
+
+  // Secrets (wrangler secret put <NAME>, never in this file):
+  //   GOOGLE_OAUTH_CLIENT_ID, GOOGLE_OAUTH_CLIENT_SECRET   Google OAuth web client for the Claude login
+  //   GOOGLE_SA_JSON                                       service account key JSON (GA4 + Search Console)
+  //   CONFIRM_HMAC_KEY                                     signs confirm tokens (32+ chars)
+
+  "observability": { "enabled": true }
+}

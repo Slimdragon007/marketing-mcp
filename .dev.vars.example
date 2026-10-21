@@ -1,0 +1,6 @@
+# Copy to .dev.vars for `wrangler dev`. Never commit .dev.vars.
+PUBLIC_ORIGIN=http://localhost:8799
+GOOGLE_OAUTH_CLIENT_ID=
+GOOGLE_OAUTH_CLIENT_SECRET=
+GOOGLE_SA_JSON=
+CONFIRM_HMAC_KEY=
